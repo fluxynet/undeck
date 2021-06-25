@@ -3,6 +3,7 @@ package french
 import (
 	"go.fluxy.net/undeck"
 	"go.fluxy.net/undeck/internal"
+	"log"
 	"strconv"
 	"strings"
 )
@@ -86,6 +87,17 @@ func (r rank) Validate() error {
 }
 
 func rankFromString(s string) (rank, error) {
+	switch s {
+	case "A":
+		return Ace, nil
+	case "J":
+		return Jack, nil
+	case "Q":
+		return Queen, nil
+	case "K":
+		return King, nil
+	}
+
 	var raw, err = strconv.Atoi(s)
 
 	if err != nil {
@@ -105,13 +117,13 @@ type suit rune
 func (s suit) String() string {
 	switch s {
 	case Spade:
-		return "SPADE"
+		return "SPADES"
 	case Diamond:
-		return "DIAMOND"
+		return "DIAMONDS"
 	case Club:
-		return "CLUB"
+		return "CLUBS"
 	case Heart:
-		return "HEART"
+		return "HEARTS"
 	}
 
 	return "?"
@@ -179,6 +191,17 @@ func (c card) Duplicate() undeck.Card {
 	}
 }
 
+// MustString is FromString or fatal
+func MustString(s string) undeck.Card {
+	var c, err = FromString(s)
+
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	return c
+}
+
 // FromString returns a card from short hand string e.g. 2H will return 2 of Hearts
 func FromString(s string) (undeck.Card, error) {
 	var (
@@ -205,7 +228,8 @@ func FromString(s string) (undeck.Card, error) {
 func All() []undeck.Card {
 	var (
 		i     int
-		cards = make([]undeck.Card, 52)
+		cards []undeck.Card
+
 		suits = []suit{
 			Spade,
 			Diamond,
@@ -232,10 +256,10 @@ func All() []undeck.Card {
 
 	for s := range suits {
 		for r := range ranks {
-			cards[i] = card{
+			cards = append(cards, card{
 				rank: ranks[r],
 				suit: suits[s],
-			}
+			})
 
 			i++
 		}

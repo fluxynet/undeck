@@ -12,9 +12,11 @@ var (
 
 // Repo is for deck persistence
 type Repo interface {
+	Create(ctx context.Context) (Deck, error)
+
 	// Save a deck
 	Save(ctx context.Context, deck Deck) (Deck, error)
 
 	// Find a deck by id
-	Find(ctx context.Context, id string) (*Deck, error)
+	Find(ctx context.Context, id string) (Deck, error)
 }

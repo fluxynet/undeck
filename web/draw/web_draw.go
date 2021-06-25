@@ -2,8 +2,8 @@ package draw
 
 import (
 	"go.fluxy.net/undeck"
-	"go.fluxy.net/undeck/card"
-	"go.fluxy.net/undeck/card/french"
+	"go.fluxy.net/undeck/cards"
+	"go.fluxy.net/undeck/cards/french"
 	"go.fluxy.net/undeck/web"
 	"net/http"
 	"strconv"
@@ -33,15 +33,20 @@ func (s *Draw) Create(w http.ResponseWriter, r *http.Request) {
 		ctx   = r.Context()
 		query = r.URL.Query()
 
-		deck undeck.Deck
-		res  createResponse
-		err  error
+		res createResponse
+
+		deck, err = s.repo.Create(ctx)
 	)
+
+	if err != nil {
+		web.JsonError(w, http.StatusInternalServerError, err)
+		return
+	}
 
 	if rawCards := query.Get("cards"); rawCards == "" {
 		deck = deck.Add(french.All()...)
-	} else if cards, err := card.FromString(french.FromString, rawCards); err == nil {
-		deck = deck.Add(cards...)
+	} else if cs, err := cards.FromString(french.FromString, rawCards); err == nil {
+		deck = deck.Add(cs...)
 	} else {
 		web.JsonError(w, http.StatusBadRequest, err)
 		return
@@ -65,8 +70,8 @@ func (s *Draw) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	res = createResponse{
-		DeckID:    deck.ID,
-		Shuffled:  deck.IsShuffled,
+		DeckID:    deck.ID(),
+		Shuffled:  deck.IsShuffled(),
 		Remaining: deck.Remaining(),
 	}
 
@@ -83,7 +88,7 @@ type openResponse struct {
 func (s *Draw) Open(w http.ResponseWriter, r *http.Request) {
 	var (
 		ctx  = r.Context()
-		deck *undeck.Deck
+		deck undeck.Deck
 		res  openResponse
 
 		id, err = s.idGetter(r)
@@ -103,15 +108,13 @@ func (s *Draw) Open(w http.ResponseWriter, r *http.Request) {
 	}
 
 	res = openResponse{
-		DeckID:    deck.ID,
-		Shuffled:  deck.IsShuffled,
+		DeckID:    deck.ID(),
+		Shuffled:  deck.IsShuffled(),
 		Remaining: deck.Remaining(),
 	}
 
-	res.Cards = make([]undeck.CardState, deck.Remaining())
-
-	for i := range res.Cards {
-		res.Cards[i] = undeck.ToCardState(deck.Cards[i])
+	for _, c := range deck.Cards() {
+		res.Cards = append(res.Cards, undeck.ToCardState(c))
 	}
 
 	web.Json(w, res)
@@ -123,14 +126,19 @@ type drawResponse struct {
 
 func (s *Draw) Draw(w http.ResponseWriter, r *http.Request) {
 	var (
-		count int
-		cards []undeck.Card
-		res   drawResponse
-		deck  undeck.Deck
+		count    int
+		cardlist []undeck.Card
+		res      drawResponse
+		deck     undeck.Deck
 
 		ctx     = r.Context()
 		id, err = s.idGetter(r)
 	)
+
+	if err != nil {
+		web.JsonError(w, http.StatusBadRequest, err)
+		return
+	}
 
 	if raw := r.URL.Query().Get("count"); raw == "" {
 		count = 1
@@ -140,7 +148,7 @@ func (s *Draw) Draw(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if d, err := s.repo.Find(ctx, id); err == nil {
-		deck = *d
+		deck = d
 	} else if err == undeck.ErrDeckNotFound {
 		web.JsonError(w, http.StatusNotFound, err)
 		return
@@ -149,7 +157,7 @@ func (s *Draw) Draw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	deck, cards, err = deck.Draw(count)
+	deck, cardlist, err = deck.Draw(count)
 	if err == undeck.ErrNotEnoughCards {
 		web.JsonError(w, http.StatusBadRequest, err)
 		return
@@ -164,10 +172,8 @@ func (s *Draw) Draw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	res.Cards = make([]undeck.CardState, count)
-
-	for i := range res.Cards {
-		res.Cards[i] = undeck.ToCardState(cards[i])
+	for i := range cardlist {
+		res.Cards = append(res.Cards, undeck.ToCardState(cardlist[i]))
 	}
 
 	web.Json(w, res)

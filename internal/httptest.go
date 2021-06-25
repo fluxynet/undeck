@@ -49,25 +49,31 @@ func AssertHttp(t *testing.T, w *httptest.ResponseRecorder, wStatus int, wHeader
 	}
 }
 
+type HttpTestRequest struct {
+	Path   string
+	Method string
+	Header http.Header
+	Body   string
+}
+
+type HttpTestWant struct {
+	Status int
+	Header http.Header
+	Body   string
+}
+
 // HttpTest case with assertions
 type HttpTest struct {
+	Name string
+
 	// Handler is the function we are testing
 	Handler http.HandlerFunc
 
 	// Request details we will be sending
-	Request struct {
-		Path   string
-		Method string
-		Header http.Header
-		Body   string
-	}
+	Request HttpTestRequest
 
 	// Want stuffs
-	Want struct {
-		Status int
-		Header http.Header
-		Body   string
-	}
+	Want HttpTestWant
 }
 
 // Assert all as per Want
@@ -80,7 +86,7 @@ func (h HttpTest) Assert(t *testing.T) {
 
 	r, err := http.NewRequest(h.Request.Method, h.Request.Path, b)
 	if err != nil {
-		t.Errorf("failed to init request: %s", err.Error())
+		t.Errorf("[%s] failed to init request: %s", h.Name, err.Error())
 		return
 	}
 
@@ -100,7 +106,7 @@ func (h HttpTest) Assert(t *testing.T) {
 	)
 
 	if status != h.Want.Status {
-		t.Errorf("status not as wanted: want = %d, got = %d", h.Want.Status, status)
+		t.Errorf("[%s] status not as wanted: want = %d, got = %d", h.Name, h.Want.Status, status)
 	}
 
 	if wb != gb {
@@ -111,11 +117,11 @@ func (h HttpTest) Assert(t *testing.T) {
 		wb = replacer.Replace(wb)
 		gb = replacer.Replace(gb)
 
-		t.Errorf("body not as wanted.\nwant = %s\ngot  = %s", wb, gb)
+		t.Errorf("[%s] body not as wanted.\nwant = %s\ngot  = %s", h.Name, wb, gb)
 	}
 
 	if lw != lg {
-		t.Errorf("headers count: want = %d, got = %d", lw, lg)
+		t.Errorf("[%s] headers count: want = %d, got = %d", h.Name, lw, lg)
 		return
 	}
 
@@ -123,13 +129,13 @@ func (h HttpTest) Assert(t *testing.T) {
 		var gv = headers[k]
 
 		if len(wv) != len(gv) {
-			t.Errorf("header [%s] length: want = %d, got = %d", k, len(wv), len(gv))
+			t.Errorf("[%s] header [%s] length: want = %d, got = %d", h.Name, k, len(wv), len(gv))
 			continue
 		}
 
 		for i := range wv {
 			if wv[i] != gv[i] {
-				t.Errorf("header[%s][%d]: want = %s, got = %s", k, i, wv[i], gv[i])
+				t.Errorf("[%s] header[%s][%d]: want = %s, got = %s", h.Name, k, i, wv[i], gv[i])
 			}
 		}
 	}

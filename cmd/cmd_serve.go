@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/spf13/cobra"
+	"go.fluxy.net/undeck/decks/decks"
 	"go.fluxy.net/undeck/repo/memory"
 	wchi "go.fluxy.net/undeck/web/chi"
 	"go.fluxy.net/undeck/web/draw"
@@ -17,7 +18,7 @@ type Server struct {
 
 func (s Server) serveCmd(cmd *cobra.Command, args []string) {
 	var (
-		repo  = memory.New()
+		repo  = memory.New(decks.New)
 		drawg = draw.New(repo, wchi.IDGetter)
 		mux   = chi.NewMux()
 	)

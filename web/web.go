@@ -31,7 +31,7 @@ var (
 	ErrPayloadUnverified = errors.New("payload could not be verified")
 
 	// ErrIDMissing from query string
-	ErrIDMissing = errors.New("id missing from query string")
+	ErrIDMissing = errors.New("id missing from request")
 )
 
 // Print sends data to the browser
@@ -121,4 +121,11 @@ func ReadBody(r *http.Request) ([]byte, error) {
 // Response is a generic reply
 type Response struct {
 	Message string `json:"message"`
+}
+
+// StaticIDGetter always returns the same id, err combination. useful for testing
+func StaticIDGetter(id string, err error) IDGetter {
+	return func(r *http.Request) (string, error) {
+		return id, err
+	}
 }
