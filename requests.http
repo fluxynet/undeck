@@ -1,0 +1,22 @@
+### No Params
+POST http://127.0.0.1:1337/draw/deck
+
+### Specify Cards
+
+POST http://127.0.0.1:1337/draw/deck?cards=AH,KH
+
+### Shuffle It
+
+POST http://127.0.0.1:1337/draw/deck?shuffle=true
+
+### Open it
+
+GET http://127.0.0.1:1337/draw/deck/ab13093b-889f-4db2-8186-5d23b90be2e2
+
+### Draw from it
+
+PATCH http://127.0.0.1:1337/draw/deck/ab13093b-889f-4db2-8186-5d23b90be2e2
+
+### Overdraw
+
+PATCH http://127.0.0.1:1337/draw/deck/ab13093b-889f-4db2-8186-5d23b90be2e2
