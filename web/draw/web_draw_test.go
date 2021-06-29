@@ -81,7 +81,7 @@ func TestDraw_Create(t *testing.T) {
 					Header: http.Header{
 						"Content-Type": {web.ContentTypeJSON},
 					},
-					Body: `{"error":"strconv.Atoi: parsing \"2Spad\": invalid syntax"}`,
+					Body: `{"error":"card does not have a valid rank"}`,
 				},
 			},
 		},
@@ -182,13 +182,13 @@ func TestDraw_Create(t *testing.T) {
 			},
 			after: memory.NewWith(
 				nil, undeck.OneTwoSwapShuffler,
-				undeck.Deck{ID: "1", IsShuffled: true, Shuffler: undeck.OneTwoSwapShuffler}.Add(cards.MustString(french.FromString, "9D,10S,8C,7H")...),
+				undeck.Deck{ID: "1", IsShuffled: true, Shuffler: undeck.OneTwoSwapShuffler}.Add(cards.MustString(french.FromString, "9D,TS,8C,7H")...),
 			),
 			http: internal.HttpTest{
 				Name:    "card list and shuffle",
 				Handler: nil,
 				Request: internal.HttpTestRequest{
-					Path:   "?cards=10S,9D,8C,7H&shuffle=true",
+					Path:   "?cards=TS,9D,8C,7H&shuffle=true",
 					Method: http.MethodPost,
 					Header: http.Header{},
 					Body:   "",
