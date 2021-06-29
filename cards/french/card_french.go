@@ -3,7 +3,6 @@ package french
 import (
 	"go.fluxy.net/undeck"
 	"go.fluxy.net/undeck/internal"
-	"strconv"
 	"strings"
 )
 
@@ -43,34 +42,66 @@ func init() {
 type rank int
 
 func (r rank) String() string {
-	switch {
-	case r == 1:
+	switch r {
+	case 1:
 		return "ACE"
-	case r == 11:
+	case 2:
+		return "TWO"
+	case 3:
+		return "THREE"
+	case 4:
+		return "FOUR"
+	case 5:
+		return "FIVE"
+	case 6:
+		return "SIX"
+	case 7:
+		return "SEVEN"
+	case 8:
+		return "EIGHT"
+	case 9:
+		return "NINE"
+	case 10:
+		return "TEN"
+	case 11:
 		return "JACK"
-	case r == 12:
+	case 12:
 		return "QUEEN"
-	case r == 13:
+	case 13:
 		return "KING"
-	case r > 0 && r < 11:
-		return strconv.Itoa(int(r))
 	}
 
 	return "!"
 }
 
 func (r rank) Short() string {
-	switch {
-	case r == 1:
+	switch r {
+	case 1:
 		return "A"
-	case r == 11:
+	case 2:
+		return "2"
+	case 3:
+		return "3"
+	case 4:
+		return "4"
+	case 5:
+		return "5"
+	case 6:
+		return "6"
+	case 7:
+		return "7"
+	case 8:
+		return "8"
+	case 9:
+		return "9"
+	case 10:
+		return "T"
+	case 11:
 		return "J"
-	case r == 12:
+	case 12:
 		return "Q"
-	case r == 13:
+	case 13:
 		return "K"
-	case r > 1 && r < 11:
-		return strconv.Itoa(int(r))
 	}
 
 	return "!"
@@ -88,22 +119,30 @@ func rankFromString(s string) (rank, error) {
 	switch s {
 	case "A":
 		return Ace, nil
+	case "2":
+		return Two, nil
+	case "3":
+		return Three, nil
+	case "4":
+		return Four, nil
+	case "5":
+		return Five, nil
+	case "6":
+		return Six, nil
+	case "7":
+		return Seven, nil
+	case "8":
+		return Eight, nil
+	case "9":
+		return Nine, nil
+	case "T":
+		return Ten, nil
 	case "J":
 		return Jack, nil
 	case "Q":
 		return Queen, nil
 	case "K":
 		return King, nil
-	}
-
-	var raw, err = strconv.Atoi(s)
-
-	if err != nil {
-		return 0, err
-	}
-
-	if raw >= 1 && raw <= 13 {
-		return rank(raw), nil
 	}
 
 	return UnknownRank, undeck.ErrInvalidRank
