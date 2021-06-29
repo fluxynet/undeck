@@ -4,7 +4,6 @@ import (
 	"go.fluxy.net/undeck"
 	"go.fluxy.net/undeck/cards"
 	"go.fluxy.net/undeck/cards/french"
-	"go.fluxy.net/undeck/decks/dummy"
 	"go.fluxy.net/undeck/internal"
 	"go.fluxy.net/undeck/repo"
 	"go.fluxy.net/undeck/repo/memory"
@@ -33,13 +32,13 @@ func TestDraw_Create(t *testing.T) {
 		{
 			fields: fields{
 				repo: memory.NewWith(
-					dummy.NewDecker(),
 					repo.Sequential("1"),
+					undeck.OneTwoSwapShuffler,
 				),
 				idGetter: nil,
 			},
 			after: memory.NewWith(
-				nil, nil, dummy.NewWithCards("1", false, french.All()...),
+				nil, undeck.OneTwoSwapShuffler, undeck.Deck{ID: "1"}.Add(french.All()...),
 			),
 			http: internal.HttpTest{
 				Name:    "no arguments",
@@ -62,12 +61,12 @@ func TestDraw_Create(t *testing.T) {
 		{
 			fields: fields{
 				repo: memory.NewWith(
-					dummy.NewDecker(),
 					repo.Sequential("1"),
+					undeck.OneTwoSwapShuffler,
 				),
 				idGetter: nil,
 			},
-			after: memory.NewWith(nil, nil),
+			after: memory.NewWith(nil, undeck.OneTwoSwapShuffler),
 			http: internal.HttpTest{
 				Name:    "bad card list param",
 				Handler: nil,
@@ -89,13 +88,14 @@ func TestDraw_Create(t *testing.T) {
 		{
 			fields: fields{
 				repo: memory.NewWith(
-					dummy.NewDecker(),
 					repo.Sequential("1"),
+					undeck.OneTwoSwapShuffler,
 				),
 				idGetter: nil,
 			},
 			after: memory.NewWith(
-				nil, nil, dummy.NewWithCards("1", false, cards.MustString(french.FromString, "2S,3D,4C,5H")...),
+				nil, undeck.OneTwoSwapShuffler,
+				undeck.Deck{ID: "1", Shuffler: undeck.OneTwoSwapShuffler}.Add(cards.MustString(french.FromString, "2S,3D,4C,5H")...),
 			),
 			http: internal.HttpTest{
 				Name:    "card list only",
@@ -118,12 +118,12 @@ func TestDraw_Create(t *testing.T) {
 		{
 			fields: fields{
 				repo: memory.NewWith(
-					dummy.NewDecker(),
 					repo.Sequential("1"),
+					undeck.OneTwoSwapShuffler,
 				),
 				idGetter: nil,
 			},
-			after: memory.NewWith(nil, nil),
+			after: memory.NewWith(nil, undeck.OneTwoSwapShuffler),
 			http: internal.HttpTest{
 				Name:    "bad shuffle param",
 				Handler: nil,
@@ -145,13 +145,14 @@ func TestDraw_Create(t *testing.T) {
 		{
 			fields: fields{
 				repo: memory.NewWith(
-					dummy.NewDecker(),
 					repo.Sequential("1"),
+					undeck.OneTwoSwapShuffler,
 				),
 				idGetter: nil,
 			},
 			after: memory.NewWith(
-				nil, nil, dummy.NewWithCards("1", true, fakeFrenchShuffled...),
+				nil, undeck.OneTwoSwapShuffler,
+				undeck.Deck{ID: "1", IsShuffled: true, Shuffler: undeck.OneTwoSwapShuffler}.Add(fakeFrenchShuffled...),
 			),
 			http: internal.HttpTest{
 				Name:    "shuffle only",
@@ -174,13 +175,14 @@ func TestDraw_Create(t *testing.T) {
 		{
 			fields: fields{
 				repo: memory.NewWith(
-					dummy.NewDecker(),
 					repo.Sequential("1"),
+					undeck.OneTwoSwapShuffler,
 				),
 				idGetter: nil,
 			},
 			after: memory.NewWith(
-				nil, nil, dummy.NewWithCards("1", true, cards.MustString(french.FromString, "9D,10S,8C,7H")...),
+				nil, undeck.OneTwoSwapShuffler,
+				undeck.Deck{ID: "1", IsShuffled: true, Shuffler: undeck.OneTwoSwapShuffler}.Add(cards.MustString(french.FromString, "9D,10S,8C,7H")...),
 			),
 			http: internal.HttpTest{
 				Name:    "card list and shuffle",
@@ -212,7 +214,7 @@ func TestDraw_Create(t *testing.T) {
 			tt.http.Handler = s.Create
 
 			tt.http.Assert(t)
-			internal.AssertReposEqual(t, tt.fields.repo, tt.after)
+			internal.AssertReposEqual(t, tt.after, tt.fields.repo)
 		})
 	}
 }
@@ -222,16 +224,14 @@ func TestDraw_Open(t *testing.T) {
 		{
 			fields: fields{
 				repo: memory.NewWith(
-					nil,
-					nil,
-					dummy.NewWithCards("1", true, cards.MustString(french.FromString, "AH,JH,QH,KH")...),
+					nil, undeck.OneTwoSwapShuffler,
+					undeck.Deck{ID: "1", Shuffler: undeck.OneTwoSwapShuffler}.Add(cards.MustString(french.FromString, "AH,JH,QH,KH")...),
 				),
 				idGetter: web.StaticIDGetter("", web.ErrIDMissing),
 			},
 			after: memory.NewWith(
-				nil,
-				nil,
-				dummy.NewWithCards("1", true, cards.MustString(french.FromString, "AH,JH,QH,KH")...),
+				nil, undeck.OneTwoSwapShuffler,
+				undeck.Deck{ID: "1", Shuffler: undeck.OneTwoSwapShuffler}.Add(cards.MustString(french.FromString, "AH,JH,QH,KH")...),
 			),
 			http: internal.HttpTest{
 				Name:    "id missing",
@@ -254,16 +254,14 @@ func TestDraw_Open(t *testing.T) {
 		{
 			fields: fields{
 				repo: memory.NewWith(
-					nil,
-					nil,
-					dummy.NewWithCards("1", true, cards.MustString(french.FromString, "AH,JH,QH,KH")...),
+					nil, undeck.OneTwoSwapShuffler,
+					undeck.Deck{ID: "1", Shuffler: undeck.OneTwoSwapShuffler}.Add(cards.MustString(french.FromString, "AH,JH,QH,KH")...),
 				),
 				idGetter: web.StaticIDGetter("2", nil),
 			},
 			after: memory.NewWith(
-				nil,
-				nil,
-				dummy.NewWithCards("1", true, cards.MustString(french.FromString, "AH,JH,QH,KH")...),
+				nil, undeck.OneTwoSwapShuffler,
+				undeck.Deck{ID: "1", Shuffler: undeck.OneTwoSwapShuffler}.Add(cards.MustString(french.FromString, "AH,JH,QH,KH")...),
 			),
 			http: internal.HttpTest{
 				Name:    "non-existent deck",
@@ -286,16 +284,14 @@ func TestDraw_Open(t *testing.T) {
 		{
 			fields: fields{
 				repo: memory.NewWith(
-					nil,
-					nil,
-					dummy.NewWithCards("1", false),
+					nil, undeck.OneTwoSwapShuffler,
+					undeck.Deck{ID: "1", Shuffler: undeck.OneTwoSwapShuffler},
 				),
 				idGetter: web.StaticIDGetter("1", nil),
 			},
 			after: memory.NewWith(
-				nil,
-				nil,
-				dummy.NewWithCards("1", false),
+				nil, undeck.OneTwoSwapShuffler,
+				undeck.Deck{ID: "1", Shuffler: undeck.OneTwoSwapShuffler},
 			),
 			http: internal.HttpTest{
 				Name:    "empty deck",
@@ -318,16 +314,14 @@ func TestDraw_Open(t *testing.T) {
 		{
 			fields: fields{
 				repo: memory.NewWith(
-					nil,
-					nil,
-					dummy.NewWithCards("1", true, cards.MustString(french.FromString, "AH,JH,QH,KH")...),
+					nil, undeck.OneTwoSwapShuffler,
+					undeck.Deck{ID: "1", IsShuffled: true, Shuffler: undeck.OneTwoSwapShuffler}.Add(cards.MustString(french.FromString, "AH,JH,QH,KH")...),
 				),
 				idGetter: web.StaticIDGetter("1", nil),
 			},
 			after: memory.NewWith(
-				nil,
-				nil,
-				dummy.NewWithCards("1", true, cards.MustString(french.FromString, "AH,JH,QH,KH")...),
+				nil, undeck.OneTwoSwapShuffler,
+				undeck.Deck{ID: "1", IsShuffled: true, Shuffler: undeck.OneTwoSwapShuffler}.Add(cards.MustString(french.FromString, "AH,JH,QH,KH")...),
 			),
 			http: internal.HttpTest{
 				Name:    "existing shuffled deck",
@@ -350,16 +344,14 @@ func TestDraw_Open(t *testing.T) {
 		{
 			fields: fields{
 				repo: memory.NewWith(
-					nil,
-					nil,
-					dummy.NewWithCards("1", false, cards.MustString(french.FromString, "AH,JH,QH,KH")...),
+					nil, undeck.OneTwoSwapShuffler,
+					undeck.Deck{ID: "1", Shuffler: undeck.OneTwoSwapShuffler}.Add(cards.MustString(french.FromString, "AH,JH,QH,KH")...),
 				),
 				idGetter: web.StaticIDGetter("1", nil),
 			},
 			after: memory.NewWith(
-				nil,
-				nil,
-				dummy.NewWithCards("1", false, cards.MustString(french.FromString, "AH,JH,QH,KH")...),
+				nil, undeck.OneTwoSwapShuffler,
+				undeck.Deck{ID: "1", Shuffler: undeck.OneTwoSwapShuffler}.Add(cards.MustString(french.FromString, "AH,JH,QH,KH")...),
 			),
 			http: internal.HttpTest{
 				Name:    "existing non-shuffled deck",
@@ -391,7 +383,7 @@ func TestDraw_Open(t *testing.T) {
 			tt.http.Handler = s.Open
 
 			tt.http.Assert(t)
-			internal.AssertReposEqual(t, tt.fields.repo, tt.after)
+			internal.AssertReposEqual(t, tt.after, tt.fields.repo)
 		})
 	}
 }
@@ -401,16 +393,14 @@ func TestDraw_Draw(t *testing.T) {
 		{
 			fields: fields{
 				repo: memory.NewWith(
-					nil,
-					nil,
-					dummy.NewWithCards("1", true, cards.MustString(french.FromString, "AH,JH,QH,KH")...),
+					nil, undeck.OneTwoSwapShuffler,
+					undeck.Deck{ID: "1", Shuffler: undeck.OneTwoSwapShuffler}.Add(cards.MustString(french.FromString, "AH,JH,QH,KH")...),
 				),
 				idGetter: web.StaticIDGetter("", web.ErrIDMissing),
 			},
 			after: memory.NewWith(
-				nil,
-				nil,
-				dummy.NewWithCards("1", true, cards.MustString(french.FromString, "AH,JH,QH,KH")...),
+				nil, undeck.OneTwoSwapShuffler,
+				undeck.Deck{ID: "1", Shuffler: undeck.OneTwoSwapShuffler}.Add(cards.MustString(french.FromString, "AH,JH,QH,KH")...),
 			),
 			http: internal.HttpTest{
 				Name:    "id missing",
@@ -433,16 +423,14 @@ func TestDraw_Draw(t *testing.T) {
 		{
 			fields: fields{
 				repo: memory.NewWith(
-					nil,
-					nil,
-					dummy.NewWithCards("1", true, cards.MustString(french.FromString, "AH,JH,QH,KH")...),
+					nil, undeck.OneTwoSwapShuffler,
+					undeck.Deck{ID: "1", Shuffler: undeck.OneTwoSwapShuffler}.Add(cards.MustString(french.FromString, "AH,JH,QH,KH")...),
 				),
 				idGetter: web.StaticIDGetter("2", nil),
 			},
 			after: memory.NewWith(
-				nil,
-				nil,
-				dummy.NewWithCards("1", true, cards.MustString(french.FromString, "AH,JH,QH,KH")...),
+				nil, undeck.OneTwoSwapShuffler,
+				undeck.Deck{ID: "1", Shuffler: undeck.OneTwoSwapShuffler}.Add(cards.MustString(french.FromString, "AH,JH,QH,KH")...),
 			),
 			http: internal.HttpTest{
 				Name:    "non-existent deck",
@@ -465,16 +453,14 @@ func TestDraw_Draw(t *testing.T) {
 		{
 			fields: fields{
 				repo: memory.NewWith(
-					nil,
-					nil,
-					dummy.NewWithCards("1", true, cards.MustString(french.FromString, "AH,JH,QH,KH")...),
+					nil, undeck.OneTwoSwapShuffler,
+					undeck.Deck{ID: "1", Shuffler: undeck.OneTwoSwapShuffler}.Add(cards.MustString(french.FromString, "AH,JH,QH,KH")...),
 				),
 				idGetter: web.StaticIDGetter("1", nil),
 			},
 			after: memory.NewWith(
-				nil,
-				nil,
-				dummy.NewWithCards("1", true, cards.MustString(french.FromString, "AH,JH,QH,KH")...),
+				nil, undeck.OneTwoSwapShuffler,
+				undeck.Deck{ID: "1", Shuffler: undeck.OneTwoSwapShuffler}.Add(cards.MustString(french.FromString, "AH,JH,QH,KH")...),
 			),
 			http: internal.HttpTest{
 				Name:    "bad count param",
@@ -497,16 +483,14 @@ func TestDraw_Draw(t *testing.T) {
 		{
 			fields: fields{
 				repo: memory.NewWith(
-					nil,
-					nil,
-					dummy.NewWithCards("1", false),
+					nil, undeck.OneTwoSwapShuffler,
+					undeck.Deck{ID: "1", Shuffler: undeck.OneTwoSwapShuffler},
 				),
 				idGetter: web.StaticIDGetter("1", nil),
 			},
 			after: memory.NewWith(
-				nil,
-				nil,
-				dummy.NewWithCards("1", false),
+				nil, undeck.OneTwoSwapShuffler,
+				undeck.Deck{ID: "1", Shuffler: undeck.OneTwoSwapShuffler},
 			),
 			http: internal.HttpTest{
 				Name:    "empty deck",
@@ -529,16 +513,14 @@ func TestDraw_Draw(t *testing.T) {
 		{
 			fields: fields{
 				repo: memory.NewWith(
-					nil,
-					nil,
-					dummy.NewWithCards("1", true, cards.MustString(french.FromString, "AH,JH,QH,KH")...),
+					nil, undeck.OneTwoSwapShuffler,
+					undeck.Deck{ID: "1", Shuffler: undeck.OneTwoSwapShuffler}.Add(cards.MustString(french.FromString, "AH,JH,QH,KH")...),
 				),
 				idGetter: web.StaticIDGetter("1", nil),
 			},
 			after: memory.NewWith(
-				nil,
-				nil,
-				dummy.NewWithCards("1", true, cards.MustString(french.FromString, "JH,QH,KH")...),
+				nil, undeck.OneTwoSwapShuffler,
+				undeck.Deck{ID: "1", Shuffler: undeck.OneTwoSwapShuffler}.Add(cards.MustString(french.FromString, "JH,QH,KH")...),
 			),
 			http: internal.HttpTest{
 				Name:    "non-empty deck draw",
@@ -561,16 +543,14 @@ func TestDraw_Draw(t *testing.T) {
 		{
 			fields: fields{
 				repo: memory.NewWith(
-					nil,
-					nil,
-					dummy.NewWithCards("1", true, cards.MustString(french.FromString, "AH,JH,QH,KH")...),
+					nil, undeck.OneTwoSwapShuffler,
+					undeck.Deck{ID: "1", Shuffler: undeck.OneTwoSwapShuffler}.Add(cards.MustString(french.FromString, "AH,JH,QH,KH")...),
 				),
 				idGetter: web.StaticIDGetter("1", nil),
 			},
 			after: memory.NewWith(
-				nil,
-				nil,
-				dummy.NewWithCards("1", true, cards.MustString(french.FromString, "QH,KH")...),
+				nil, undeck.OneTwoSwapShuffler,
+				undeck.Deck{ID: "1", Shuffler: undeck.OneTwoSwapShuffler}.Add(cards.MustString(french.FromString, "QH,KH")...),
 			),
 			http: internal.HttpTest{
 				Name:    "non-empty deck draw 2",
@@ -593,16 +573,14 @@ func TestDraw_Draw(t *testing.T) {
 		{
 			fields: fields{
 				repo: memory.NewWith(
-					nil,
-					nil,
-					dummy.NewWithCards("1", true, cards.MustString(french.FromString, "AH,JH,QH,KH")...),
+					nil, undeck.OneTwoSwapShuffler,
+					undeck.Deck{ID: "1", Shuffler: undeck.OneTwoSwapShuffler}.Add(cards.MustString(french.FromString, "AH,JH,QH,KH")...),
 				),
 				idGetter: web.StaticIDGetter("1", nil),
 			},
 			after: memory.NewWith(
-				nil,
-				nil,
-				dummy.NewWithCards("1", true, cards.MustString(french.FromString, "AH,JH,QH,KH")...),
+				nil, undeck.OneTwoSwapShuffler,
+				undeck.Deck{ID: "1", Shuffler: undeck.OneTwoSwapShuffler}.Add(cards.MustString(french.FromString, "AH,JH,QH,KH")...),
 			),
 			http: internal.HttpTest{
 				Name:    "non-empty deck overdraw",
@@ -634,7 +612,7 @@ func TestDraw_Draw(t *testing.T) {
 			tt.http.Handler = s.Draw
 
 			tt.http.Assert(t)
-			internal.AssertReposEqual(t, tt.fields.repo, tt.after)
+			internal.AssertReposEqual(t, tt.after, tt.fields.repo)
 		})
 	}
 }

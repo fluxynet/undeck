@@ -30,11 +30,20 @@ type Suit interface {
 	Validate() error
 }
 
-// Card used in games
-type Card interface {
-	Rank() Rank
-	Suit() Suit
-	Duplicate() Card
+type Card struct {
+	Rank Rank
+	Suit Suit
+}
+
+func (c Card) String() string {
+	return c.Rank.Short() + c.Suit.Short()
+}
+
+func (c Card) Duplicate() Card {
+	return Card{
+		Rank: c.Rank,
+		Suit: c.Suit,
+	}
 }
 
 // CardState the state of a card, can be used for serialization
@@ -49,8 +58,8 @@ func ToCardState(c Card) CardState {
 	var (
 		s CardState
 
-		rank = c.Rank()
-		suit = c.Suit()
+		rank = c.Rank
+		suit = c.Suit
 	)
 
 	s.Code = rank.Short() + suit.Short()

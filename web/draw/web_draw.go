@@ -70,8 +70,8 @@ func (s *Draw) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	res = createResponse{
-		DeckID:    deck.ID(),
-		Shuffled:  deck.IsShuffled(),
+		DeckID:    deck.ID,
+		Shuffled:  deck.IsShuffled,
 		Remaining: deck.Remaining(),
 	}
 
@@ -108,8 +108,8 @@ func (s *Draw) Open(w http.ResponseWriter, r *http.Request) {
 	}
 
 	res = openResponse{
-		DeckID:    deck.ID(),
-		Shuffled:  deck.IsShuffled(),
+		DeckID:    deck.ID,
+		Shuffled:  deck.IsShuffled,
 		Remaining: deck.Remaining(),
 	}
 

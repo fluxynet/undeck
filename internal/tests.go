@@ -58,13 +58,13 @@ func AssertCardSlicesEqual(t *testing.T, a, b []undeck.Card) bool {
 	}
 
 	for i := range a {
-		if a[i].Rank() != b[i].Rank() {
-			t.Errorf("rank [%d] not same, want %d, got %d", i, a[i].Rank(), b[i].Rank())
+		if a[i].Rank.String() != b[i].Rank.String() {
+			t.Errorf("rank not same, want %s, got %s", a[i].Rank.String(), b[i].Rank.String())
 			return false
 		}
 
-		if a[i].Suit() != b[i].Suit() {
-			t.Errorf("rank [%d] not same, want %s, got %s", i, a[i].Suit().String(), b[i].Suit().String())
+		if a[i].Suit.String() != b[i].Suit.String() {
+			t.Errorf("rank not same, want %s, got %s", a[i].Suit.String(), b[i].Suit.String())
 			return false
 		}
 	}
@@ -73,17 +73,13 @@ func AssertCardSlicesEqual(t *testing.T, a, b []undeck.Card) bool {
 }
 
 func AssertDecksEqual(t *testing.T, a, b undeck.Deck) bool {
-	if (a == nil) != (b == nil) {
-		t.Errorf("one is nil and one is not\nwant= %v\ngot  = %v", a, b)
-	}
-
-	if a.ID() != b.ID() {
-		t.Errorf("ids not same\nwant = %s\ngot  = %s", a.ID(), b.ID())
+	if a.ID != b.ID {
+		t.Errorf("ids not same\nwant = %s\ngot  = %s", a.ID, b.ID)
 		return false
 	}
 
-	if a.IsShuffled() != b.IsShuffled() {
-		t.Errorf("shuffled not same\nwant = %t\ngot  = %t", a.IsShuffled(), b.IsShuffled())
+	if a.IsShuffled != b.IsShuffled {
+		t.Errorf("shuffled not same\nwant = %t\ngot  = %t", a.IsShuffled, b.IsShuffled)
 		return false
 	}
 

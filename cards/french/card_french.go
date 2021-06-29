@@ -3,7 +3,6 @@ package french
 import (
 	"go.fluxy.net/undeck"
 	"go.fluxy.net/undeck/internal"
-	"log"
 	"strconv"
 	"strings"
 )
@@ -37,7 +36,6 @@ func init() {
 	var (
 		_ undeck.Rank = rank(1)
 		_ undeck.Suit = suit('S')
-		_ undeck.Card = card{}
 	)
 }
 
@@ -170,58 +168,26 @@ func suitFromString(s string) (suit, error) {
 	return UnknownSuit, undeck.ErrInvalidSuit
 }
 
-// card consisting of a value and a suitFromString
-type card struct {
-	rank rank
-	suit suit
-}
-
-func (c card) Rank() undeck.Rank {
-	return c.rank
-}
-
-func (c card) Suit() undeck.Suit {
-	return c.suit
-}
-
-func (c card) Duplicate() undeck.Card {
-	return card{
-		rank: c.rank,
-		suit: c.suit,
-	}
-}
-
-// MustString is FromString or fatal
-func MustString(s string) undeck.Card {
-	var c, err = FromString(s)
-
-	if err != nil {
-		log.Fatalln(err.Error())
-	}
-
-	return c
-}
-
 // FromString returns a card from short hand string e.g. 2H will return 2 of Hearts
 func FromString(s string) (undeck.Card, error) {
 	var (
 		err  error
-		card card
+		card undeck.Card
 
 		head, suffix = internal.HeadSuffix(s)
 	)
 
-	card.rank, err = rankFromString(head)
+	card.Rank, err = rankFromString(head)
 	if err != nil {
-		return nil, err
+		return card, err
 	}
 
-	card.suit, err = suitFromString(suffix)
+	card.Suit, err = suitFromString(suffix)
 	if err != nil {
-		return nil, err
+		return card, err
 	}
 
-	return &card, nil
+	return card, nil
 }
 
 // All returns the complete set of cards sequentially
@@ -256,9 +222,9 @@ func All() []undeck.Card {
 
 	for s := range suits {
 		for r := range ranks {
-			cards = append(cards, card{
-				rank: ranks[r],
-				suit: suits[s],
+			cards = append(cards, undeck.Card{
+				Rank: ranks[r],
+				Suit: suits[s],
 			})
 
 			i++
